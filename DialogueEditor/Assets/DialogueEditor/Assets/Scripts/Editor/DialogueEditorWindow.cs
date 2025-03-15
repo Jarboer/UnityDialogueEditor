@@ -58,13 +58,14 @@ namespace DialogueEditor
         private const string CONTROL_NAME = "DEFAULT_CONTROL";
         public const int MIN_PANEL_WIDTH = 180;
         private const string UNAVAILABLE_DURING_PLAY_TEXT = "Dialogue Editor unavaiable during play mode.";
+        private const string UNAVAILABLE_DURING_PREFAB_MODE = "Dialogue Editor is unavailable in prefab-mode.\nThis is due to how the Events are serialised.";
 
         // Static properties
         public static bool SelectableClickedOnThisUpdate { get; set; }
         private static SelectableUI CurrentlySelectedObject { get; set; }
 
         // Private variables:     
-        private NPCConversation CurrentAsset;           // The Conversation scriptable object that is currently being viewed/edited
+        private NPCConversation CurrentAsset;           // The Conversation object that is currently being viewed/edited
         public static EditableSpeechNode ConversationRoot { get; private set; }    // The root node of the conversation
         private List<UINode> uiNodes;                   // List of all UI nodes
 
@@ -428,7 +429,7 @@ namespace DialogueEditor
         {
             if (Application.isPlaying)
             {
-                DrawMessageDuringPlay();
+                DrawMessageDuringPlay(UNAVAILABLE_DURING_PLAY_TEXT);
                 return;
             }
 
@@ -439,6 +440,12 @@ namespace DialogueEditor
                 {
                     Repaint();
                 }
+                return;
+            }
+
+            if (UnityEditor.SceneManagement.EditorSceneManager.IsPreviewScene(CurrentAsset.gameObject.scene))
+            {
+                DrawMessageDuringPlay(UNAVAILABLE_DURING_PREFAB_MODE);
                 return;
             }
 
@@ -458,15 +465,15 @@ namespace DialogueEditor
                 Repaint();
         }
 
-        private void DrawMessageDuringPlay()
+        private void DrawMessageDuringPlay(string message)
         {
             float width = this.position.width;
             float centerX = width / 2;
             float height = this.position.height;
             float centerY = height / 2;
-            Vector2 textDimensions = GUI.skin.label.CalcSize(new GUIContent(UNAVAILABLE_DURING_PLAY_TEXT));
+            Vector2 textDimensions = GUI.skin.label.CalcSize(new GUIContent(message));
             Rect textRect = new Rect(centerX - (textDimensions.x / 2), centerY - (textDimensions.y / 2), textDimensions.x, textDimensions.y);
-            EditorGUI.LabelField(textRect, UNAVAILABLE_DURING_PLAY_TEXT);
+            EditorGUI.LabelField(textRect, message);
         }
 
         private void DrawTitleBar()
