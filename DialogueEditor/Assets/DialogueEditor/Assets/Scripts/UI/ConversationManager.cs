@@ -70,6 +70,7 @@ namespace DialogueEditor
         private float m_elapsedScrollTime;
         private int m_scrollIndex;
         public int m_targetScrollTextCount;
+        private bool m_skipScroll;
         private eState m_state;
         private float m_stateTime;
         
@@ -184,7 +185,7 @@ namespace DialogueEditor
 
         public void PressSelectedOption()
         {
-            if (m_state != eState.Idle) { return; }
+            if (m_state != eState.Idle && m_state != eState.ScrollingText) { return; }
             if (m_currentSelectedIndex < 0) { return; }
             if (m_currentSelectedIndex >= m_uiOptions.Count) { return; }
             if (m_uiOptions.Count == 0) { return; }
@@ -297,6 +298,9 @@ namespace DialogueEditor
                 case eState.ScrollingText:
                     {
                         SetColorAlpha(DialogueText, 1);
+                        
+                        if (ScrollText)
+                            CreateSkipButton();
                     }
                     break;
 
@@ -350,12 +354,25 @@ namespace DialogueEditor
             {
                 m_elapsedScrollTime = 0f;
 
-                DialogueText.maxVisibleCharacters = m_scrollIndex;
-                m_scrollIndex++;
+                if (m_skipScroll)
+                {
+                    m_scrollIndex = m_targetScrollTextCount; // Force set the index to skip
+                    DialogueText.maxVisibleCharacters = m_scrollIndex;
+                }
+                else
+                {
+                    DialogueText.maxVisibleCharacters = m_scrollIndex;
+                    m_scrollIndex++;
+                }
 
                 // Finished?
                 if (m_scrollIndex >= m_targetScrollTextCount)
                 {
+                    if (ScrollText)
+                        ClearOptions();
+                        
+                    m_skipScroll = false;
+                        
                     SetState(eState.TransitioningOptionsOn);
                 }
             }
@@ -577,6 +594,11 @@ namespace DialogueEditor
             SetState(eState.TransitioningOptionsOff);
         }
 
+        public void SkipButtonSelected()
+        {
+            m_skipScroll = true;
+        }
+
 
 
 
@@ -650,6 +672,14 @@ namespace DialogueEditor
 #if UNITY_EDITOR
             // Debug.Log("[ConversationManager]: Conversation UI off.");
 #endif
+        }
+
+        private void CreateSkipButton()
+        {
+            UIConversationButton uiOption = CreateButton();
+            uiOption.SetupButton(UIConversationButton.eButtonType.Skip, null, endFont: m_conversation.SkipConversationFont);
+            
+            SetSelectedOption(0);
         }
 
         private void CreateUIOptions()

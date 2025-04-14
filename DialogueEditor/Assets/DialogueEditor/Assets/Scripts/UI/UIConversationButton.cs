@@ -17,7 +17,8 @@ namespace DialogueEditor
         {
             Option,
             Speech,
-            End
+            End,
+            Skip
         }
 
         // Getters
@@ -171,7 +172,7 @@ namespace DialogueEditor
             TextMesh.color = c_text;
         }
 
-        public void SetupButton(eButtonType buttonType, ConversationNode node, TMPro.TMP_FontAsset continueFont = null, TMPro.TMP_FontAsset endFont = null)
+        public void SetupButton(eButtonType buttonType, ConversationNode node, TMPro.TMP_FontAsset continueFont = null, TMPro.TMP_FontAsset endFont = null, TMPro.TMP_FontAsset skipFont = null)
         {
             m_buttonType = buttonType;
             m_node = node;
@@ -187,15 +188,22 @@ namespace DialogueEditor
 
                 case eButtonType.Speech:
                     {
-                        TextMesh.text = "Continue.";
+                        TextMesh.text = "Continue";
                         TextMesh.font = continueFont;
                     }
                     break;
 
                 case eButtonType.End:
                     {
-                        TextMesh.text = "End.";
+                        TextMesh.text = "End";
                         TextMesh.font = endFont;
+                    }
+                    break;
+                
+                case eButtonType.Skip:
+                    {
+                        TextMesh.text = "Skip";
+                        TextMesh.font = skipFont;
                     }
                     break;
             }
@@ -222,6 +230,9 @@ namespace DialogueEditor
 
                 case eButtonType.End:
                     ConversationManager.Instance.EndButtonSelected();
+                    break;
+                case eButtonType.Skip:
+                    ConversationManager.Instance.SkipButtonSelected();
                     break;
             }
         }

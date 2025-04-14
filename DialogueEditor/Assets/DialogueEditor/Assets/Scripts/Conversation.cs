@@ -32,6 +32,9 @@ namespace DialogueEditor
 
         /// <summary> The font used for the 'End' button. </summary>
         public TMPro.TMP_FontAsset EndConversationFont;
+        
+        /// <summary> The font used for the 'Skip' button. </summary>
+        public TMPro.TMP_FontAsset SkipConversationFont;
 
         // ---
 
